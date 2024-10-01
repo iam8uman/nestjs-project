@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service'; // Assuming PrismaService is set up
 import { CreateUsersDto } from './dto/create-users.dto';
 import { UpdateUserDto } from './dto/update-users.dto';
@@ -9,12 +14,32 @@ export class UsersService {
 
   async create(createUserDto: CreateUsersDto) {
     try {
+      console.log('Creating user with data:', createUserDto);
+
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: createUserDto.email },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('User with this email already exists');
+      }
+
+      // Create the user in the database
       const user = await this.prisma.user.create({
         data: createUserDto,
       });
+      console.log('User created successfully:', user);
       return user;
     } catch (error) {
-      throw new Error('Error creating user');
+      console.error('Error creating user:', error);
+
+      if (error instanceof ConflictException) {
+        throw error; // rethrow conflict exception
+      }
+
+      throw new InternalServerErrorException(
+        'Error creating user. Please try again later.',
+      );
     }
   }
 
