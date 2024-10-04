@@ -90,9 +90,10 @@ export class UsersService {
         where: { email },
       });
 
-      // If user doesn't exist, throw NotFoundException
+      // If user doesn't exist, return null
       if (!user) {
-        throw new NotFoundException(`User with email ${email} not found`);
+        console.log(`User with email ${email} not found`);
+        return null;
       }
 
       console.log('Found user by email:', user);

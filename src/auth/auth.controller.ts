@@ -1,5 +1,5 @@
 // auth/auth.controller.ts
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -27,5 +27,25 @@ export class AuthController {
   async refresh(@Req() req: Request) {
     const userId = req.user['userId'];
     return this.authService.validateUser(userId);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: Request) {
+    const userId = req.user['userId'];
+    return this.authService.logout(userId);
+  }
+
+  @Get('validate')
+  @UseGuards(JwtAuthGuard)
+  async validate(@Req() req: Request) {
+    const userId = req.user['userId'];
+    return this.authService.validateUser(userId);
+  }
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Req() req: Request) {
+    const userId = req.user['userId']; // Extracting userId from the JWT
+    return this.authService.getUserDetails(userId);
   }
 }
